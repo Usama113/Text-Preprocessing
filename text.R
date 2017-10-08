@@ -66,3 +66,60 @@ docs_st <- tm_map(docs_st, PlainTextDocument)
 #Stripping unnecessary whitespace
 docs=tm_map(docs,stripWhitespace)
 docs=tm_map(docs,PlainTextDocument)
+
+
+#Stage the Data
+dtm=DocumentTermMatrix(docs)
+#inspect(dtm[1:5,1:20])#view first 5 docs and first 20 terms
+
+#taking transpose of the matrix
+tdm=TermDocumentMatrix(docs)
+
+#Organize terms by frequency
+freq=colSums(as.matrix(dtm))
+freq
+ord=order(freq)
+
+#exporting matrix to Excel
+m=as.matrix(dtm)
+dim(m)
+
+write.csv(m,file = "DocumentTermMatrix.csv")
+
+#removing sparse terms
+dtms=removeSparseTerms(dtm,0.2)
+dtms
+
+#frequency of remaining terms
+freq <- colSums(as.matrix(dtm))
+
+
+freq <- colSums(as.matrix(dtms))   
+freq
+
+
+
+#All terms that appear frequently 50 or more times
+wf=findFreqTerms(dtm,lowfreq = 50)
+wf
+
+#Another way to do it
+wf <- data.frame(word=names(freq), freq=freq)   
+head(wf) 
+
+
+#Plotting word frequencies
+library(ggplot2)
+
+p = ggplot(subset(wf, freq>50), aes(x = reorder(word, -freq), y = freq)) +
+  geom_bar(stat = "identity") + 
+  theme(axis.text.x=element_text(angle=45, hjust=1))
+p
+
+#Finding correalted terms
+findAssocs(dtm,c("country","american"), corlimit = 0.85)
+
+
+wordcloud::wordcloud(names(freq),freq,min.freq = 25)
+
+
